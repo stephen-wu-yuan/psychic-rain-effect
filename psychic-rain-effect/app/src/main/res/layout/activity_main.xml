@@ -5,5 +5,11 @@
     android:background="@drawable/background_5"
     android:id="@+id/mainview_id">
 
+    <particlesystem.example.com.particlesystem.app.view.PushPullDoorView
+        android:id="@+id/pull_down_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+    </particlesystem.example.com.particlesystem.app.view.PushPullDoorView>
 
 </RelativeLayout>

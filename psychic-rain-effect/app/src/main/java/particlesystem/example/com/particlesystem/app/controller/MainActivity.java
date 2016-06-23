@@ -20,7 +20,7 @@
  * * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-package particlesystem.example.com.particlesystem.view;
+package particlesystem.example.com.particlesystem.app.controller;
 
 import android.app.Activity;
 import android.content.Context;
@@ -31,24 +31,24 @@ import android.view.WindowManager;
 import android.widget.RelativeLayout;
 
 import particlesystem.example.com.particlesystem.R;
+import particlesystem.example.com.particlesystem.app.view.PushPullDoorView;
 import particlesystem.example.com.particlesystem.lib.initializers.ParticleSystem;
 
 public class MainActivity extends Activity {
 
     private boolean isFirstTime = true;
 
-    private ParticleSystem rainSystemTop;
-    private ParticleSystem rainSystemLeft;
-    private ParticleSystem rainDropSystem;
+    private ParticleSystem mRainSystemTop;
+    private ParticleSystem mRainSystemLeft;
+    private ParticleSystem mRainDropSystem;
 
-    private int preScrollHomeIndex = 0;
     private int mCurrentHomeIndex = 0;
 
-    private int screenHeight;
+    private RelativeLayout mParentView;
 
+    private int mScreenHeight;
 
-    private RelativeLayout parentView;
-
+    private PushPullDoorView mPullDoorView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,11 +57,11 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         getWindow().setFormat(PixelFormat.TRANSLUCENT);
 
+        mParentView = (RelativeLayout) findViewById(R.id.mainview_id);
+        mScreenHeight = getScreenHeight();
 
-        parentView = (RelativeLayout) findViewById(R.id.mainview_id);
-
-        screenHeight = getScreenHeight();
-
+        mPullDoorView = (PushPullDoorView)findViewById(R.id.pull_down_view);
+        mPullDoorView.setMainActivity(this);
     }
 
 
@@ -70,10 +70,11 @@ public class MainActivity extends Activity {
     public void onResume() {
         super.onResume();
         if (isFirstTime) {
-            parentView.postDelayed(new Runnable() {
+            mParentView.postDelayed(new Runnable() {
 
                 @Override
                 public void run() {
+                    mPullDoorView.dragDownViewAuto();
                     startRunEffect(true);
                 }
             }, 600);
@@ -90,64 +91,71 @@ public class MainActivity extends Activity {
     private int getScreenHeight() {
         WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
         @SuppressWarnings("deprecation")
-        int height = wm.getDefaultDisplay().getHeight();// 屏幕高度
+        int height = wm.getDefaultDisplay().getHeight();
         return height;
     }
 
     private void startRunEffect(boolean isPullUp) {
         //rain
-        if (rainSystemLeft == null) {
-            rainSystemLeft = new ParticleSystem(MainActivity.this, 200, R.drawable.rainline, 10000);
-            rainSystemLeft = rainSystemLeft.setExactlyScale(0.4f)
+        if (mRainSystemLeft == null) {
+            mRainSystemLeft = new ParticleSystem(MainActivity.this, 200, R.drawable.rainline, 10000);
+            mRainSystemLeft = mRainSystemLeft.setExactlyScale(0.4f)
                     .setAcceleration(0.000013f, 90)
                     .setInitialRotationRange(true, 150)
                     .setSpeedByComponentsRange(0.8f, 0.8f, 0.8f, 0.8f)
                     .setParticleAlpha(0.8f);
             //set gravity = 10 make sure the emit covery all the screen.
-            rainSystemLeft.emitWithGravity(parentView, Gravity.LEFT, 20);
+            mRainSystemLeft.emitWithGravity(mParentView, Gravity.LEFT, 20);
 
         }
-        if (rainSystemTop == null) {
-            rainSystemTop = new ParticleSystem(MainActivity.this, 200, R.drawable.rainline, 10000);
-            rainSystemTop = rainSystemTop.setExactlyScale(0.4f)
+        if (mRainSystemTop == null) {
+            mRainSystemTop = new ParticleSystem(MainActivity.this, 200, R.drawable.rainline, 10000);
+            mRainSystemTop = mRainSystemTop.setExactlyScale(0.4f)
                     .setAcceleration(0.000013f, 90)
                     .setInitialRotationRange(true, 150)
                     .setSpeedByComponentsRange(0.8f, 0.8f, 0.8f, 0.8f)
                     .setParticleAlpha(0.8f);
             //set gravity = 10 make sure the emit covery all the screen.
-            rainSystemTop.emitWithGravity(parentView, Gravity.TOP, 20);
+            mRainSystemTop.emitWithGravity(mParentView, Gravity.TOP, 20);
 
         }
 
         //rain drop
 
-        if (rainDropSystem == null && isPullUp) {
-            rainDropSystem = new ParticleSystem(MainActivity.this, 200, R.drawable.raindrop2, 30000);
-            rainDropSystem = rainDropSystem.setSpeedRelatedSize(0.05f, 0.1f, 0.5f, 0.000013f)
+        if (mRainDropSystem == null && isPullUp) {
+            mRainDropSystem = new ParticleSystem(MainActivity.this, 200, R.drawable.raindrop2, 30000);
+            mRainDropSystem = mRainDropSystem.setSpeedRelatedSize(0.05f, 0.1f, 0.5f, 0.000013f)
                     .setFadeOut(200).setIsNeedMerge(true);
             //set gravity = 10 make sure the emit covery all the screen.
-            rainDropSystem.emitWithGravity(parentView, 10, 20);
+            mRainDropSystem.emitWithGravity(mParentView, 10, 20);
         }
 
     }
 
     public void stopParticle() {
-        if (rainSystemLeft != null) {
-            rainSystemLeft.stopEmitting();
-            rainSystemTop.stopEmitting();
+        if (mRainSystemLeft != null) {
+            mRainSystemLeft.stopEmitting();
+            mRainSystemTop.stopEmitting();
 
-            rainSystemLeft.recycleUsedParticle();
-            rainSystemTop.recycleUsedParticle();
-            rainSystemLeft = null;
-            rainSystemTop = null;
+            mRainSystemLeft.recycleUsedParticle();
+            mRainSystemTop.recycleUsedParticle();
+            mRainSystemLeft = null;
+            mRainSystemTop = null;
         }
-        if (rainDropSystem != null) {
-            rainDropSystem.stopEmitting();
-            rainDropSystem.recycleUsedParticle();
-            rainDropSystem = null;
+        if (mRainDropSystem != null) {
+            mRainDropSystem.stopEmitting();
+            mRainDropSystem.recycleUsedParticle();
+            mRainDropSystem = null;
         }
     }
 
+    public void stopRainDrop(){
+        if (mRainDropSystem != null){
+            mRainDropSystem.stopEmitting();
+            mRainDropSystem.recycleUsedParticle();
+            mRainDropSystem = null;
+        }
+    }
 
     public void stopWeatherEffect() {
         stopParticle();
@@ -158,5 +166,18 @@ public class MainActivity extends Activity {
     public void onDestroy() {
         super.onDestroy();
         stopWeatherEffect();
+    }
+
+
+    public void resumeParticle2(){
+        if (mPullDoorView != null && mPullDoorView.isStateBottom()){
+            if (mRainDropSystem == null){
+                mRainDropSystem = new ParticleSystem(this, 200, R.drawable.raindrop2, 30000);
+                mRainDropSystem = mRainDropSystem.setSpeedRelatedSize(0.05f,0.1f, 0.5f,0.000013f)
+                        .setFadeOut(200).setIsNeedMerge(true);
+                //set gravity = 10 make sure the emit covery all the screen.
+                mRainDropSystem.emitWithGravity(mPullDoorView, 10, 20);
+            }
+        }
     }
 }
